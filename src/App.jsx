@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import './App.css'
 import MaintenancePage from './pages/maintenance'
 
@@ -7,7 +6,7 @@ function App() {
 
   return (
     <div>
-<MaintenancePage/>
+         <MaintenancePage/>
     </div>
 
   )
