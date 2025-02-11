@@ -1,24 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-
-// Current date/time display component
-const DateTime = () => {
-  return (
-    <motion.div 
-      className="absolute top-6 right-6 text-white/70 text-sm font-mono"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 1 }}
-    >
-      {new Date().toLocaleString('en-US', {
-        hour12: false,
-        timeStyle: 'medium',
-        dateStyle: 'medium'
-      })}
-    </motion.div>
-  );
-};
 
 // Smart Home Illustration Component
 const SmartHomeIllustration = () => (
@@ -131,33 +113,8 @@ const HeroSection = () => {
   }, [controls, inView]);
 
   return (
-    <section className="relative min-h-screen flex items-center bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 overflow-hidden">
-      {/* Company Logo/Name */}
-      <motion.div 
-        className="absolute top-6 left-6 z-20"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="flex items-center gap-3">
-          <motion.div
-            className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <span className="text-white font-bold text-xl">SI</span>
-          </motion.div>
-          <div className="flex flex-col">
-            <h1 className="text-2xl font-bold text-white tracking-tight">S.I Technologies</h1>
-            <span className="text-blue-400 text-sm">Smart Innovative Solutions</span>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* DateTime Display */}
-      <DateTime />
-
-      {/* Animated Background Elements */}
+    <section className="relative min-h-screen flex items-center bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 overflow-hidden pt-24 pb-16">
+      {/* Background Animation */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20" />
         {[...Array(20)].map((_, i) => (
@@ -183,24 +140,12 @@ const HeroSection = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Text Content */}
           <motion.div
             ref={ref}
             initial="hidden"
             animate={controls}
-            className="text-left max-w-2xl mt-20 lg:mt-0"
+            className="text-left max-w-2xl mt-24 lg:mt-0"
           >
-            <motion.div
-              className="inline-block px-4 py-2 mb-6 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full border border-blue-500/30"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <span className="text-blue-400 font-semibold">
-                Innovating Smart Living
-              </span>
-            </motion.div>
-
             <motion.h1
               className="text-5xl md:text-7xl font-bold mb-6"
               initial={{ opacity: 0, y: 20 }}
@@ -208,11 +153,11 @@ const HeroSection = () => {
               transition={{ delay: 0.5 }}
             >
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-                Transform Your Home
+                Transform Your Space
               </span>
               <br />
               <span className="text-white">
-                With Smart Technology
+                With Smart Living
               </span>
             </motion.h1>
 
@@ -222,36 +167,55 @@ const HeroSection = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
             >
-              Experience the perfect blend of comfort, security, and efficiency with our 
-              cutting-edge smart home solutions. Control everything from lighting to climate 
-              with just a touch.
+              Experience the future of home automation with S.I Technologies. 
+              Our smart solutions seamlessly integrate comfort, security, and 
+              efficiency into your daily life.
             </motion.p>
 
             <motion.div
-              className="flex flex-wrap gap-4"
+              className="flex flex-col sm:flex-row gap-4 mb-12"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9 }}
             >
               <motion.button
-                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-4 rounded-full font-semibold hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300"
+                className="relative overflow-hidden group bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-4 rounded-full font-semibold transition-all duration-300"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Get Started Now
+                <span className="relative z-10">Get Started Now</span>
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  initial={false}
+                />
               </motion.button>
+
               <motion.button
-                className="bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-full font-semibold hover:bg-white/20 transition-all duration-300"
+                className="relative overflow-hidden group bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-full font-semibold transition-all duration-300"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Watch Demo
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  Watch Demo
+                  <svg 
+                    className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M14 5l7 7m0 0l-7 7m7-7H3" 
+                    />
+                  </svg>
+                </span>
               </motion.button>
             </motion.div>
 
-            {/* Stats */}
             <motion.div
-              className="grid grid-cols-3 gap-8 mt-12"
+              className="grid grid-cols-3 gap-8 p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.1 }}
@@ -269,12 +233,10 @@ const HeroSection = () => {
             </motion.div>
           </motion.div>
 
-          {/* Illustration */}
           <SmartHomeIllustration />
         </div>
       </div>
 
-      {/* Scroll Indicator */}
       <motion.div
         className="absolute bottom-8 left-1/2 -translate-x-1/2"
         animate={{ y: [0, 10, 0] }}
