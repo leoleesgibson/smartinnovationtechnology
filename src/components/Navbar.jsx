@@ -65,7 +65,8 @@ const Navbar = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <span className="text-white font-bold text-xl">SI</span>
+              <span className="text-white font-bold text-xl">S.I</span> 
+
             </motion.div>
             <div className="hidden sm:block">
               <h1 className="text-xl font-bold text-white">S.I Technologies</h1>

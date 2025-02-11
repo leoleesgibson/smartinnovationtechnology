@@ -1,19 +1,15 @@
 import React from 'react';
+import ContactHeroComponent from '../components/ContactHeroComponent';
+import KeyServices from '../components/KeyServices'; // Import KeyServices
+import Testimonials from '../components/Testimonials'; // Import Testimonials
 
 const ContactUs = () => {
   return (
-    <div>
-      <h1>Contact Us</h1>
-      <p>Feel free to reach out for inquiries and support.</p>
-      <form>
-        {/* Add your contact form here */}
-        <label>Name:</label>
-        <input type="text" />
-        <label>Email:</label>
-        <input type="email" />
-        <button type="submit">Submit</button>
-      </form>
-    </div>
+   <>
+    <ContactHeroComponent />
+    <KeyServices /> {/* Render KeyServices */}
+    <Testimonials /> {/* Render Testimonials */}
+   </>
   );
 };
 

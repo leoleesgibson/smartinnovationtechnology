@@ -1,11 +1,15 @@
 import React from 'react';
+import AboutUsComponent from '../components/about/AboutUsComponent';
+import KeyServices from '../components/KeyServices'; // Import KeyServices
+import Testimonials from '../components/Testimonials'; // Import Testimonials
 
 const AboutUs = () => {
   return (
-    <div>
-      <h1>About Us</h1>
-      <p>We specialize in Smart Home Automation, IT, and E-Security.</p>
-    </div>
+    <>
+      <AboutUsComponent />
+      <KeyServices /> {/* Render KeyServices */}
+      <Testimonials /> {/* Render Testimonials */}
+    </>
   );
 };
 

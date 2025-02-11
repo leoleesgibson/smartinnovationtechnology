@@ -1,16 +1,15 @@
 import React from 'react';
+import ServiceHeroComponent from '../components/ServiceHeroComponent';
+import KeyServices from '../components/KeyServices'; // Import KeyServices
+import Testimonials from '../components/Testimonials'; // Import Testimonials
 
 const Services = () => {
   return (
-    <div>
-      <h1>Our Services</h1>
-      <ul>
-        <li>Smart Home Automation</li>
-        <li>IT Services</li>
-        <li>CCTV and Fire Alarm Systems</li>
-        <li>Access Control and Electric Fencing</li>
-      </ul>
-    </div>
+    <>
+        <ServiceHeroComponent />
+        <KeyServices /> {/* Render KeyServices */}
+        <Testimonials /> {/* Render Testimonials */}
+    </>
   );
 };
 
