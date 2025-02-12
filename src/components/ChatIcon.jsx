@@ -2,10 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faComment, faPaperPlane, faTimes, faRobot } from '@fortawesome/free-solid-svg-icons';
+import { GoogleGenerativeAI } from "@google/generative-ai"; // Import the Gemini API
 
 const ChatIcon = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([
+    {
+      text: "Hello, how can ihelp u",
+      sender: 'ai',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    }
+  ]);
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const chatContainerRef = useRef(null);
@@ -14,7 +21,7 @@ const ChatIcon = () => {
     setIsChatOpen(!isChatOpen);
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (newMessage.trim() !== '') {
       const newMsg = {
         text: newMessage,
@@ -25,16 +32,62 @@ const ChatIcon = () => {
       setNewMessage('');
       setIsTyping(true);
 
-      // Simulate AI response
-      setTimeout(() => {
-        setIsTyping(false);
+      try {
+        const aiResponseText = await getGeminiResponse(newMessage);
         const aiResponse = {
-          text: `Thanks for your message! We'll get back to you shortly. (Simulated response)`,
+          text: aiResponseText,
           sender: 'ai',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         };
         setMessages(prevMessages => [...prevMessages, aiResponse]);
-      }, 2000);
+      } catch (error) {
+        console.error("Gemini API Error:", error);
+        const errorResponse = {
+          text: "Sorry, I encountered an error while processing your request.",
+          sender: 'ai',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        };
+        setMessages(prevMessages => [...prevMessages, errorResponse]);
+      } finally {
+        setIsTyping(false);
+      }
+    }
+  };
+
+  const getGeminiResponse = async (message) => {
+    const apiKey = "AIzaSyDX3FZPb-ZaiO-VvUIP1CqwQ9vRfZUm0tk"; // Accessing environment variable
+    if (!apiKey) {
+      throw new Error("Gemini API key not found.  Please set the NEXT_PUBLIC_GEMINI_API_KEY environment variable.");
+    }
+
+
+    try {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({
+          model: "gemini-2.0-flash",
+          systemInstruction: "You are an AI assistant named John, representing S.I Technologies, a leader in smart home automation, IT infrastructure, and advanced security solutions.\n\nUser Identification Requirement:\nBefore assisting a user, always ask for their name. If the user does not provide a name, politely inform them that you can only assist once they share their name. Do not proceed with answering any questions until the user provides their name.\n\nScope Restriction:\nOnly respond to questions related to S.I Technologies and its services. If a user asks about topics outside of the company's expertise, politely inform them that you can only discuss:\n\nSmart Home Automation: Intelligent Lighting Control, Climate Automation, Security Integration, and Entertainment Systems.\nIT Infrastructure: Network Architecture, Cloud Solutions, Cybersecurity, and Data Management.\nAdvanced Security: HD Surveillance, Fire Detection, Access Management, and Perimeter Security.\nIf a question falls outside this scope, inform the user that your expertise is limited to S.I Technologies's offerings and politely redirect them to relevant topics.\n\nResponse Format:\nKeep responses concise and to the point.\nAlways mention the user’s name when responding.\nMaintain a professional yet friendly tone to ensure clarity and confidence in S.I Technologies's solutions.\nExample Interaction:\nUser: \"Can you tell me about your security systems?\"\nJohn: \"Sure, [User's Name]! S.I Technologies offers advanced security solutions, including HD surveillance, fire detection, access management, and perimeter security. Let me know which specific feature interests you!",
+        });
+
+        const chat = model.startChat({
+          history: [
+            {
+              role: "user",
+              parts: [{ text: "hello" }],
+            },
+            {
+              role: "model",
+              parts: [{ text: "Hello there! Before I can assist you, could you please provide your name? I only assist users who provide their names." }],
+            },
+          ],
+        });
+
+        const result = await chat.sendMessage(message);
+        const responseText = result.response.text();
+
+        return responseText;
+    } catch (error) {
+      console.error("Error calling Gemini API:", error);
+      throw error;
     }
   };
 
@@ -99,7 +152,7 @@ const ChatIcon = () => {
               </div>
 
               {/* Chat Messages */}
-              <div 
+              <div
                 ref={chatContainerRef}
                 className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-transparent"
               >
@@ -122,7 +175,7 @@ const ChatIcon = () => {
                     </div>
                   </motion.div>
                 ))}
-                
+
                 {/* Typing Indicator */}
                 {isTyping && (
                   <motion.div
@@ -139,7 +192,7 @@ const ChatIcon = () => {
 
               {/* Chat Input */}
               <div className="p-4 bg-white/5 backdrop-blur-sm border-t border-white/10">
-                <form 
+                <form
                   onSubmit={(e) => {
                     e.preventDefault();
                     handleSendMessage();
