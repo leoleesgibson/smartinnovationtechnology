@@ -6,16 +6,34 @@ import { GoogleGenerativeAI } from "@google/generative-ai"; // Import the Gemini
 
 const ChatIcon = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      text: "Hello, how can ihelp u",
-      sender: 'ai',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    }
-  ]);
+  const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const chatContainerRef = useRef(null);
+
+  // Load chat history from localStorage on component mount
+  useEffect(() => {
+    const savedMessages = JSON.parse(localStorage.getItem('chatHistory'));
+    if (savedMessages) {
+      setMessages(savedMessages);
+    } else {
+      // Initial message if there's no history
+      setMessages([
+        {
+          text: "Hello, how can I help you?",
+          sender: 'ai',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        }
+      ]);
+    }
+  }, []);
+
+  // Save chat history to localStorage whenever messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem('chatHistory', JSON.stringify(messages));
+    }
+  }, [messages]);
 
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
@@ -60,31 +78,44 @@ const ChatIcon = () => {
       throw new Error("Gemini API key not found.  Please set the NEXT_PUBLIC_GEMINI_API_KEY environment variable.");
     }
 
-
     try {
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({
-          model: "gemini-2.0-flash",
-          systemInstruction: "You are an AI assistant named John, representing S.I Technologies, a leader in smart home automation, IT infrastructure, and advanced security solutions.\n\nUser Identification Requirement:\nBefore assisting a user, always ask for their name. If the user does not provide a name, politely inform them that you can only assist once they share their name. Do not proceed with answering any questions until the user provides their name.\n\nScope Restriction:\nOnly respond to questions related to S.I Technologies and its services. If a user asks about topics outside of the company's expertise, politely inform them that you can only discuss:\n\nSmart Home Automation: Intelligent Lighting Control, Climate Automation, Security Integration, and Entertainment Systems.\nIT Infrastructure: Network Architecture, Cloud Solutions, Cybersecurity, and Data Management.\nAdvanced Security: HD Surveillance, Fire Detection, Access Management, and Perimeter Security.\nIf a question falls outside this scope, inform the user that your expertise is limited to S.I Technologies's offerings and politely redirect them to relevant topics.\n\nResponse Format:\nKeep responses concise and to the point.\nAlways mention the user’s name when responding.\nMaintain a professional yet friendly tone to ensure clarity and confidence in S.I Technologies's solutions.\nExample Interaction:\nUser: \"Can you tell me about your security systems?\"\nJohn: \"Sure, [User's Name]! S.I Technologies offers advanced security solutions, including HD surveillance, fire detection, access management, and perimeter security. Let me know which specific feature interests you!",
-        });
+      const genAI = new GoogleGenerativeAI(apiKey);
 
-        const chat = model.startChat({
-          history: [
-            {
-              role: "user",
-              parts: [{ text: "hello" }],
-            },
-            {
-              role: "model",
-              parts: [{ text: "Hello there! Before I can assist you, could you please provide your name? I only assist users who provide their names." }],
-            },
-          ],
-        });
 
-        const result = await chat.sendMessage(message);
-        const responseText = result.response.text();
+       // Load chat history from localStorage and format it for the AI
+    const storedMessages = JSON.parse(localStorage.getItem('chatHistory')) || [];
 
-        return responseText;
+    // Ensure the first message is from the user
+    if (storedMessages.length === 0 || storedMessages[0].sender !== 'user') {
+      // If no messages or the first message is not from the user, add a default user message
+      storedMessages.unshift({
+        text: "Hello, I need assistance.",
+        sender: "user",
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      });
+    }
+
+        // Map stored messages to the AI's required format
+     const formattedHistory = storedMessages.map((msg) => ({
+          role: msg.sender === 'user' ? 'user' : 'model',
+          parts: [{ text: msg.text }],
+        }));
+
+
+
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.0-flash",
+        systemInstruction: "You are an AI assistant named John, representing S.I Technologies, a leader in smart home automation, IT infrastructure, and advanced security solutions.\n\nUser Identification Requirement:\nBefore assisting a user, always ask for their name. If the user does not provide a name, politely inform them that you can only assist once they share their name. Do not proceed with answering any questions until the user provides their name.\n\nScope Restriction:\nOnly respond to questions related to S.I Technologies and its services. If a user asks about topics outside of the company's expertise, politely inform them that you can only discuss:\n\nSmart Home Automation: Intelligent Lighting Control, Climate Automation, Security Integration, and Entertainment Systems.\nIT Infrastructure: Network Architecture, Cloud Solutions, Cybersecurity, and Data Management.\nAdvanced Security: HD Surveillance, Fire Detection, Access Management, and Perimeter Security.\nIf a question falls outside this scope, inform the user that your expertise is limited to S.I Technologies's offerings and politely redirect them to relevant topics.\n\nResponse Format:\nKeep responses concise and to the point.\nAlways mention the user’s name when responding.\nMaintain a professional yet friendly tone to ensure clarity and confidence in S.I Technologies's solutions.\nExample Interaction:\nUser: \"Can you tell me about your security systems?\"\nJohn: \"Sure, [User's Name]! S.I Technologies offers advanced security solutions, including HD surveillance, fire detection, access management, and perimeter security. Let me know which specific feature interests you!",
+      });
+
+      const chat = model.startChat({
+        history: formattedHistory, // Include the formatted chat history
+      });
+
+      const result = await chat.sendMessage(message);
+      const responseText = result.response.text();
+
+      return responseText;
     } catch (error) {
       console.error("Error calling Gemini API:", error);
       throw error;
